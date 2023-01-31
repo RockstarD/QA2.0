@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title> Snehal Proj </title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-indigo-700 " >
+    <div class="flex  w-full h-full min-h-screen justify-center items-center" >
+        <div class=" flex flex-col gap-5 border-2 border-white rounded-md p-6 min-w-[360px] " >
+            <div class=" contain  flex flex-col gap-5" >
+
+                <input type="text" placeholder="Enter your question" class="question bg-indigo-700 p-2 border-2 border-white rounded-md text-white">
+            </div>
+
+
+            <button class="bg-indigo-900 text-white rounded-md py-2 add-question "> add question </button>
+            <button class="bg-indigo-900 text-white rounded-md py-2 submit "> Submit </button>
+            <div class="answer text-white  " >
+                Answer
+            </div>
+        </div>
+    </div>
+    <script>
+        document.querySelector(".add-question").addEventListener("click", function(){
+            // add input box
+            let input = document.createElement("input");
+            input.setAttribute("type", "text");
+            input.setAttribute("placeholder", "Enter your question");
+            input.setAttribute("class", "question bg-indigo-700 p-2 border-2 border-white rounded-md text-white");
+
+            document.querySelector(".contain").appendChild(input);
+
+        })
+
+        document.querySelector(".submit").addEventListener("click", function(){
+            // get all the questions
+            let questions = document.querySelectorAll(".question");
+            let answers = {};
+            for(let i = 0; i < questions.length; i++){
+                let que = questions[i].value;
+                // answers{i: que}
+                answers[i] = {
+                    "question": que
+                };
+            }
+            console.log(answers);
+            const andwerd =  document.querySelector(".answer")
+            if(andwerd.hasChildNodes()){
+                andwerd.removeChild(andwerd.childNodes[0]);
+            }
+
+            fetch("http://localhost:8000/predict", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify(answers)
+            }).then(function(res){
+                return res.json();
+            }).then(function(data){
+                console.log(data);
+                if(data.length !== null){
+                   const andwerdiv =  document.querySelector(".answer")
+                    // table with colume Chapter and weatage and map data puti as a child in answer class
+                    let table = document.createElement("table");
+                    table.setAttribute("class", "table-auto");
+
+                    let thead = document.createElement("thead");
+                    let tr = document.createElement("tr");
+                    let th1 = document.createElement("th");
+                    th1.setAttribute("class", "px-4 py-2");
+                    th1.innerHTML = "Chapter";
+                    let th2 = document.createElement("th");
+                    th2.setAttribute("class", "px-4 py-2");
+                    th2.innerHTML = "Weightage";
+                    tr.appendChild(th1);
+                    tr.appendChild(th2);
+                    thead.appendChild(tr);
+                    table.appendChild(thead);
+                    let tbody = document.createElement("tbody");
+                    let keys = Object.keys(data.data);
+                    let values = Object.values(data.data);
+                    console.log(keys, values)
+                    for(let i = 0; i < keys.length; i++){
+                        let tr = document.createElement("tr");
+                        let td1 = document.createElement("td");
+                        td1.setAttribute("class", "border border-white px-4 py-2");
+                        // console.log(keys[i]);
+                        td1.innerHTML = keys[i];
+                    
+                        let td2 = document.createElement("td");
+                        td2.setAttribute("class", "border border-white px-4 py-2");
+                        td2.innerHTML = values[i];
+                        tr.appendChild(td1);
+                        tr.appendChild(td2);
+                        tbody.appendChild(tr);
+                    }
+
+                    table.appendChild(tbody);
+                    andwerdiv.appendChild(table);
+
+
+
+                }
+                else{
+                    document.querySelector(".answer").innerHTML = "Something went wrong";
+                }
+            }).catch(function(err){
+                console.log(err);
+            })
+        })
+
+    </script>
+    
+</body>
+</html>
